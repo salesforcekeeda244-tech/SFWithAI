@@ -25,9 +25,10 @@ jobs:
         run: npm ci
 
       - name: Install Salesforce CLI
-        uses: salesforcecli/action-setup@v2
+        uses: amtrack/sfdx-actions/setup@v2
         with:
-          install: "sf"
+          sfdx-auto-update: false
+          sfdx-version: latest
 
       - name: Authenticate Dev Org
         run: |
