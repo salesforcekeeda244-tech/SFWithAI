@@ -1,0 +1,47 @@
+name: Validate Feature Branch
+
+on:
+  push:
+    branches:
+      - "feature/**"
+  pull_request:
+    branches:
+      - "uat"
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Salesforce CLI
+        run: |
+          npm install -g @salesforce/cli
+          sf --version
+
+      - name: Authenticate Dev Org
+        run: |
+          echo "$DEV_SFDX_AUTH_URL" > sfdx_auth_url.txt
+          sf org login sfdx-url --sfdx-url-file sfdx_auth_url.txt --alias DevOrg --set-default
+        env:
+          DEV_SFDX_AUTH_URL: ${{ secrets.DEV_SFDX_AUTH_URL }}
+
+      - name: Lint
+        run: npm run lint --if-present
+
+      - name: Unit Tests
+        run: npm test --if-present
+
+      - name: Validate deploy (check-only)
+        run: |
+          sf project deploy start --source-dir force-app --target-org DevOrg --dry-run --test-level RunLocalTests
