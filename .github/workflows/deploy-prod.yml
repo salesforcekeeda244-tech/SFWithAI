@@ -14,9 +14,9 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install Salesforce CLI
-        uses: salesforcecli/action-setup@v2
-        with:
-          install: "sf"
+        run: |
+          npm install -g @salesforce/cli
+          sf --version
 
       - name: Authenticate Prod Org
         run: |
